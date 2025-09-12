@@ -45,3 +45,8 @@ export const updateBuyer = async (id: string, data: any) => {
     return updated;
   };
   
+// Delete Buyer
+export const deleteBuyer = async (id: string) => {
+    await prisma.buyer.delete({ where: { id } });
+    return true;
+  };
