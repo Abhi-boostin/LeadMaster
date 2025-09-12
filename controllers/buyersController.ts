@@ -38,3 +38,10 @@ export const getBuyer = async (id: string) => {
     const buyer = await prisma.buyer.findUnique({ where: { id } });
     return buyer;
   };    
+
+// Update Buyer
+export const updateBuyer = async (id: string, data: any) => {
+    const updated = await prisma.buyer.update({ where: { id }, data });
+    return updated;
+  };
+  
