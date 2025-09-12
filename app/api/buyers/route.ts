@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
     const city = searchParams.get("city") || undefined;
     const take = Number(searchParams.get("take") || 20);
     const skip = Number(searchParams.get("skip") || 0);
-
     const where: any = {};
     if (status) where.status = status as any;
     if (city) where.city = city as any;
