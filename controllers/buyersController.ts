@@ -1,15 +1,24 @@
-import { prisma } from "lib/prisma";
+import { prisma } from "@/lib/prisma";
 
-// Create Buyer
-export const createBuyer = async (data: any, ownerId: string) => {
+export async function createBuyer(data: any, ownerId: string) {
   const newBuyer = await prisma.buyer.create({
     data: {
       ...data,
       ownerId,
+      status: data.status || "New",
     },
   });
+
+  await prisma.buyerHistory.create({
+    data: {
+      buyerId: newBuyer.id,
+      changedBy: ownerId,
+      diff: data,
+    },
+  });
+
   return newBuyer;
-};
+}
 
 // List Buyers (with filters and search)
 export const listBuyers = async (filters: any) => {

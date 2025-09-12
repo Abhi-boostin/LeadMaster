@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "lib/prisma";
-import { createBuyerSchema } from "lib/zodSchemas";
+import { prisma } from "@/lib/prisma";
+import { createBuyerSchema } from "@/lib/zodSchemas";
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -43,4 +43,4 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     console.error(err);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
-} 
+}

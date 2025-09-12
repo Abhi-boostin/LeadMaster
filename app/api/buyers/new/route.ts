@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createBuyer } from "controllers/buyersController";
-import { createBuyerSchema } from "lib/zodSchemas";
+import { createBuyer } from "@/controllers/buyersController";
+import { createBuyerSchema } from "@/lib/zodSchemas";
 
 export async function POST(req: NextRequest) {
   try {

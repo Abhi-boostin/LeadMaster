@@ -20,9 +20,9 @@
       }
     ],
     "paths": {
-      "lib/*": ["lib/*"],
-      "controllers/*": ["controllers/*"],
-      "app/*": ["app/*"]
+      "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
+      "@/controllers/*": ["./controllers/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
