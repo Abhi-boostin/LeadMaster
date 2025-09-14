@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from './supabaseClient';
 
 /**
  * Auth Utility - Helper Functions for Authentication
@@ -38,6 +33,22 @@ export async function getCurrentUser() {
     };
   } catch (error) {
     console.error('Error getting current user:', error);
+    return null;
+  }
+}
+
+// Helper function for middleware to verify token
+export async function verifyToken(token: string) {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return null;
+    
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.name || user.email
+    };
+  } catch (error) {
     return null;
   }
 }

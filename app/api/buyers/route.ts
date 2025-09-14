@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authMiddleware } from "@/app/api/auth/middlewares/authmiddlewares";
+import { authMiddleware } from "@/app/api/auth/middlewares/authmiddleware";
 
 export async function GET(req: NextRequest) {
   try {
