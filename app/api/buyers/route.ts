@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authMiddleware } from "@/app/api/auth/middlewares/authmiddleware";
 
 export async function GET(req: NextRequest) {
   try {
-    // 🔒 SECURITY CHECK - Must be logged in
-    const authResult = await authMiddleware(req);
-    if (!authResult.success) {
+    // Get user ID from middleware headers
+    const userId = req.headers.get('x-user-id');
+    
+    if (!userId) {
       return NextResponse.json(
-        { success: false, message: authResult.error }, 
-        { status: authResult.status }
+        { success: false, message: 'Unauthorized' }, 
+        { status: 401 }
       );
     }
-
-    // ✅ User is authenticated, get their ID
-    const userId = authResult.user.id;
     
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q") || undefined;
@@ -23,9 +20,9 @@ export async function GET(req: NextRequest) {
     const take = Number(searchParams.get("take") || 20);
     const skip = Number(searchParams.get("skip") || 0);
     
-    // 🔒 Only show this user's buyers
+    // Only show this user's buyers
     const where: any = {
-      ownerId: userId, // This ensures user only sees their own data
+      ownerId: userId,
     };
     
     if (status) where.status = status as any;
@@ -48,4 +45,4 @@ export async function GET(req: NextRequest) {
     console.error(err);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
-} 
+}
