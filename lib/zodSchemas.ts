@@ -19,16 +19,21 @@ export const propertyTypeEnum = z.enum([
   "Retail",
 ]);
 
-export const bhkEnum = z.enum(["1", "2", "3", "4", "Studio"]);
+export const bhkEnum = z.enum(["ONE", "TWO", "THREE", "FOUR", "STUDIO"]);
 
 export const purposeEnum = z.enum(["Buy", "Rent"]);
 
-export const timelineEnum = z.enum(["0-3m", "3-6m", ">6m", "Exploring"]);
+export const timelineEnum = z.enum([
+  "ZERO_3M",    // was "0-3m"
+  "THREE_6M",   // was "3-6m" 
+  "GT_6M",      // was ">6m"
+  "Exploring"
+]);
 
 export const sourceEnum = z.enum([
   "Website",
-  "Referral",
-  "Walk-in",
+  "Referral", 
+  "Walk_in",    // was "Walk-in"
   "Call",
   "Other",
 ]);
