@@ -1,11 +1,12 @@
-// app/api/buyers/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { supabase } from "@/lib/supabaseClient";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 import { createBuyerSchema } from "@/lib/zodSchemas";
 
 export async function GET(req: NextRequest) {
   try {
+    const supabase = getSupabaseServerClient();
+
     // 1️⃣ Get logged-in user from Supabase session
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    // 2️⃣ Fetch all buyers regardless of owner
+    // 2️⃣ Fetch all buyers (or later filter by ownerId = user.id)
     const buyers = await prisma.buyer.findMany({
       orderBy: { createdAt: "desc" },
     });
@@ -27,7 +28,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // 1️⃣ Get logged-in user from Supabase session
+    const supabase = getSupabaseServerClient();
+
+    // 1️⃣ Get logged-in user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -38,7 +41,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = createBuyerSchema.parse(body);
 
-    // 3️⃣ Create buyer in DB with ownerId = logged-in user
+    // 3️⃣ Create buyer with ownerId = logged-in user
     const newBuyer = await prisma.buyer.create({
       data: {
         ...validatedData,
