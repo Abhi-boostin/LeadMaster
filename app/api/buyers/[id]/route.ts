@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createBuyerSchema } from "@/lib/zodSchemas";
+import { getBuyer, updateBuyer, deleteBuyer } from "@/controllers/buyersController";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -15,14 +15,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
     
     // Only allow access to own buyers
-    const buyer = await prisma.buyer.findFirst({
-      where: { 
-        id: params.id,
-        ownerId: userId 
-      }
-    });
+    const buyer = await getBuyer(params.id);
     
-    if (!buyer) {
+    if (!buyer || buyer.ownerId !== userId) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
     
@@ -46,21 +41,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
     
     // Check if buyer exists and belongs to user
-    const existingBuyer = await prisma.buyer.findFirst({
-      where: { id: params.id, ownerId: userId }
-    });
+    const existingBuyer = await getBuyer(params.id);
     
-    if (!existingBuyer) {
+    if (!existingBuyer || existingBuyer.ownerId !== userId) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
     
     const body = await req.json();
     const validated = createBuyerSchema.partial().parse(body);
 
-    const updated = await prisma.buyer.update({ 
-      where: { id: params.id }, 
-      data: validated,
-    });
+    const updated = await updateBuyer(params.id, validated);
     
     return NextResponse.json({ success: true, buyer: updated });
   } catch (err: any) {
@@ -88,15 +78,13 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
     
     // Check if buyer exists and belongs to user
-    const existingBuyer = await prisma.buyer.findFirst({
-      where: { id: params.id, ownerId: userId }
-    });
+    const existingBuyer = await getBuyer(params.id);
     
-    if (!existingBuyer) {
+    if (!existingBuyer || existingBuyer.ownerId !== userId) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
     
-    await prisma.buyer.delete({ where: { id: params.id } });
+    await deleteBuyer(params.id);
     return NextResponse.json({ success: true });
   } catch (err: any) {
     if (err?.code === "P2025") {
