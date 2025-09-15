@@ -1,33 +1,14 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createRouteHandlerClient, createServerComponentClient, createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 export function getSupabaseServerClient() {
   return createRouteHandlerClient({ cookies })
 }
 
+export function getSupabaseServerComponentClient() {
+  return createServerComponentClient({ cookies })
+} 
 
-
-
-// import { createClient } from "@supabase/supabase-js";
-
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-// export const supabase = createClient(supabaseUrl, supabaseKey);
-
-// export async function getAuthToken() {
-//   const { data: { session } } = await supabase.auth.getSession();
-//   return session?.access_token;
-// }
-// export async function authenticatedFetch(url: string, options: RequestInit = {}) {
-//   const token = await getAuthToken();
-  
-//   return fetch(url, {
-//     ...options,
-//     headers: {
-//       ...options.headers,
-//       'Authorization': `Bearer ${token}`,
-//       'Content-Type': 'application/json',
-//     },
-//   });
-// }
+export function getSupabaseActionClient() {
+  return createServerActionClient({ cookies })
+}
