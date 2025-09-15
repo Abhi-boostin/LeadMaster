@@ -1,26 +1,24 @@
+// app/api/buyers/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createBuyerSchema } from "@/lib/zodSchemas";
 import { getBuyer, updateBuyer, deleteBuyer } from "@/controllers/buyersController";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Get user ID from middleware headers
-    const userId = req.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' }, 
-        { status: 401 }
-      );
+    const supabase = getSupabaseServerClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
-    
-    // Only allow access to own buyers
+
     const buyer = await getBuyer(params.id);
-    
-    if (!buyer || buyer.ownerId !== userId) {
+
+    if (!buyer || buyer.ownerId !== user.id) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
-    
+
     return NextResponse.json({ success: true, buyer });
   } catch (err) {
     console.error(err);
@@ -30,33 +28,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Get user ID from middleware headers
-    const userId = req.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' }, 
-        { status: 401 }
-      );
+    const supabase = getSupabaseServerClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
-    
-    // Check if buyer exists and belongs to user
+
     const existingBuyer = await getBuyer(params.id);
-    
-    if (!existingBuyer || existingBuyer.ownerId !== userId) {
+    if (!existingBuyer || existingBuyer.ownerId !== user.id) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
-    
+
     const body = await req.json();
     const validated = createBuyerSchema.partial().parse(body);
 
     const updated = await updateBuyer(params.id, validated);
-    
+
     return NextResponse.json({ success: true, buyer: updated });
   } catch (err: any) {
-    if (err?.code === "P2025") {
-      return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
-    }
     if (err?.name === "ZodError") {
       return NextResponse.json({ success: false, errors: err.errors }, { status: 400 });
     }
@@ -67,29 +57,22 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Get user ID from middleware headers
-    const userId = req.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' }, 
-        { status: 401 }
-      );
+    const supabase = getSupabaseServerClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
-    
-    // Check if buyer exists and belongs to user
+
     const existingBuyer = await getBuyer(params.id);
-    
-    if (!existingBuyer || existingBuyer.ownerId !== userId) {
+    if (!existingBuyer || existingBuyer.ownerId !== user.id) {
       return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
     }
-    
+
     await deleteBuyer(params.id);
+
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    if (err?.code === "P2025") {
-      return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
-    }
+  } catch (err) {
     console.error(err);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
